@@ -1,0 +1,115 @@
+CREATE DATABASE `quizone`;
+USE `quizone`;
+SET GLOBAL event_scheduler := 1;
+
+CREATE TABLE user
+(
+loginID varchar(15) PRIMARY KEY,
+password varchar(64),
+email varchar(40),
+name varchar(20),
+photo varchar(20),
+type int(1)
+)ENGINE=Innodb;
+
+CREATE TABLE subject
+(
+subjectID varchar(20) PRIMARY KEY,
+name varchar(30),
+loginID varchar(15),
+FOREIGN KEY (loginID) REFERENCES user(loginID)
+	ON DELETE CASCADE
+)ENGINE=Innodb;
+
+CREATE TABLE student
+(
+subjectID varchar(20),
+loginID varchar(15),
+status int(2),
+CONSTRAINT sub_stu_pair PRIMARY KEY(subjectID,loginID),
+FOREIGN KEY (subjectID) REFERENCES subject(subjectID)
+	ON DELETE CASCADE
+	ON UPDATE CASCADE,
+FOREIGN KEY (loginID) REFERENCES user(loginID)
+	ON DELETE CASCADE
+
+)ENGINE=Innodb;
+
+CREATE TABLE quiz
+(
+quizID varchar(20) PRIMARY KEY,
+name varchar(30),
+subjectID varchar(20),
+type varchar(20),
+time datetime,
+duration time,
+status int(2),
+numques int(10),
+evaluated int(2),
+FOREIGN KEY (subjectID) REFERENCES subject(subjectID)
+	ON DELETE CASCADE
+	ON UPDATE CASCADE
+)ENGINE=Innodb;
+
+CREATE TABLE invigilator
+(
+assgn_quizID varchar(20),
+auth int(2),
+loginID varchar(20),
+FOREIGN KEY (loginID) REFERENCES user(loginID)
+	ON DELETE CASCADE,
+FOREIGN KEY (assgn_quizID) REFERENCES quiz(quizID)
+	ON DELETE CASCADE
+	ON UPDATE CASCADE	
+)ENGINE=Innodb;
+
+CREATE TABLE question(
+    quizID varchar(20),
+    quesno int(4),
+    questext varchar(500),
+    answer int(1),
+    PRIMARY KEY (quizID,quesno),
+    FOREIGN KEY (quizID) REFERENCES quiz(quizID)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE
+)ENGINE=Innodb;
+
+CREATE TABLE `option`(
+    quizID varchar(20),
+    quesno int(4),
+    optext varchar(500),
+    opno int(2),
+    PRIMARY KEY (quizID,quesno,opno),
+    FOREIGN KEY (quizID,quesno) REFERENCES question(quizID,quesno)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE
+)ENGINE=Innodb;
+
+CREATE TABLE `response`(
+    loginID varchar(20),
+    quizID varchar(20),
+    quesno int(4),
+    opno int(2),
+    PRIMARY KEY (quizID,quesno,loginID),
+    FOREIGN KEY (quizID,quesno) REFERENCES question(quizID,quesno)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE,
+    FOREIGN KEY (loginID) REFERENCES user(loginID)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE
+)ENGINE=Innodb;
+
+CREATE TABLE `result`(
+    loginID varchar(20),
+    quizID varchar(20),
+    correct int(10),
+    incorrect int(10),
+    total int(10),
+    PRIMARY KEY (quizID,loginID),
+    FOREIGN KEY (quizID) REFERENCES quiz(quizID)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE,
+    FOREIGN KEY (loginID) REFERENCES user(loginID)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE
+)ENGINE=Innodb;
